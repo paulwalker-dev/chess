@@ -74,6 +74,8 @@ loop:
 
 		l.MakeMove(move.Pos{coords[0], coords[1]}, move.Pos{coords[2], coords[3]})
 
+		l.board.Show()
+
 		select {
 		case winner := <-l.winChannel:
 			name := "White"
@@ -85,7 +87,6 @@ loop:
 		default:
 		}
 
-		l.board.Show()
 		fmt.Println("Please enter your move")
 	}
 }
