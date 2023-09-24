@@ -8,6 +8,6 @@ func (Other) Name() rune {
 	return 'O'
 }
 
-func (Other) MoveValid(m move.Move) bool {
+func (Other) MoveValid(_ move.Move) bool {
 	return false
 }
