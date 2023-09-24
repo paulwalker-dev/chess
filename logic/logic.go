@@ -12,19 +12,20 @@ import (
 )
 
 type Logic struct {
-	b      board.Board
-	winner move.ViewPiece
+	board      board.Board
+	winChannel <-chan bool
 }
 
 func New() Logic {
-	l := Logic{b: board.New()}
+	winChannel := make(chan bool, 1)
+	l := Logic{board: board.New(), winChannel: winChannel}
 
 	setupHeavies := func(r []piece.Piece, isWhite bool) {
 		r[0] = piece.New(piece.Rook{}, isWhite)
 		r[1] = piece.New(piece.Knight{}, isWhite)
 		r[2] = piece.New(piece.Bishop{}, isWhite)
 		r[3] = piece.New(piece.Queen{}, isWhite)
-		r[4] = piece.New(piece.King{&l.winner}, isWhite)
+		r[4] = piece.New(piece.King{winChannel}, isWhite)
 		r[5] = piece.New(piece.Bishop{}, isWhite)
 		r[6] = piece.New(piece.Knight{}, isWhite)
 		r[7] = piece.New(piece.Rook{}, isWhite)
@@ -36,19 +37,21 @@ func New() Logic {
 		}
 	}
 
-	setupHeavies(l.b[0], false)
-	setupPawns(l.b[1], false)
+	setupHeavies(l.board[0], false)
+	setupPawns(l.board[1], false)
 
-	setupHeavies(l.b[7], true)
-	setupPawns(l.b[6], true)
+	setupHeavies(l.board[7], true)
+	setupPawns(l.board[6], true)
 
 	return l
 }
 
 func (l *Logic) Loop() {
 	scanner := bufio.NewScanner(os.Stdin)
-	l.b.Show()
+	l.board.Show()
 	fmt.Println("Please enter your move")
+
+loop:
 	for scanner.Scan() {
 		input := scanner.Text()
 
@@ -71,7 +74,18 @@ func (l *Logic) Loop() {
 
 		l.MakeMove(move.Pos{coords[0], coords[1]}, move.Pos{coords[2], coords[3]})
 
-		l.b.Show()
+		select {
+		case winner := <-l.winChannel:
+			name := "White"
+			if winner {
+				name = "Black"
+			}
+			fmt.Printf("The winner is %s\n", name)
+			break loop
+		default:
+		}
+
+		l.board.Show()
 		fmt.Println("Please enter your move")
 	}
 }

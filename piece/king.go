@@ -3,7 +3,7 @@ package piece
 import "github.com/paulwalker-dev/chess/move"
 
 type King struct {
-	Winner *move.ViewPiece
+	WinChannel chan<- bool
 }
 
 func (King) Name() rune {
