@@ -20,7 +20,7 @@ loop:
 
 		splitInput := strings.Split(input, ",")
 		if len(splitInput) != 4 {
-			fmt.Println("Invalid move")
+			fmt.Println("Invalid command")
 			continue
 		}
 
@@ -29,13 +29,17 @@ loop:
 		for i, num := range splitInput {
 			cord, err := strconv.Atoi(num)
 			if err != nil {
-				fmt.Println("Invalid move")
+				fmt.Printf("Number #%d not valid\n", i+1)
 				continue
 			}
 			coords[i] = cord
 		}
 
-		l.MakeMove(move.Pos{coords[0], coords[1]}, move.Pos{coords[2], coords[3]})
+		fromPos := move.Pos{coords[1], coords[0]}
+		toPos := move.Pos{coords[3], coords[2]}
+		if !l.MakeMove(fromPos, toPos) {
+			fmt.Println("Invalid move")
+		}
 
 		l.board.Show()
 
